@@ -26,9 +26,11 @@ def trans(content, type, style, suffix):
             lexer = get_lexer_by_name(type)
     # 指定风格
     formatter = HtmlFormatter(style=style)
+    formatter_noclass = HtmlFormatter(style=style, noclasses=True, cssclass='')
     # 获取html
     html = highlight(content, lexer, formatter)
-    return html
+    html_noclass = highlight(content, lexer, formatter_noclass).replace('&lt;', '&amp;lt;').replace('&gt;', '&amp;gt;')
+    return html, html_noclass
 
 class html:
     def GET(self, file_id):
@@ -36,8 +38,8 @@ class html:
             with open("./data/" + str(file_id), 'r') as f:
                 content = f.read()
             param = web.input(type="text",style="default", suffix=None)
-            html = trans(content, param.type, param.style, param.suffix)
-            return render.paste(html, "../static/css/"+param.style+".css", time.strftime("%Y-%m-%d %X", time.localtime()))
+            html, raw = trans(content, param.type, param.style, param.suffix)
+            return render.paste(html, raw, "../static/css/"+param.style+".css", time.strftime("%Y-%m-%d %X", time.localtime()))
         except:
             return render.error()
 
